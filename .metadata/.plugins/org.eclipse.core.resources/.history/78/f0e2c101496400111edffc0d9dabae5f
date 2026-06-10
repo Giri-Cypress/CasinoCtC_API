@@ -1,0 +1,5 @@
+package com.CasinoCtC.CCtCAPI.dao;
+
+public class TransactionInquiryDAOImpl {
+
+}

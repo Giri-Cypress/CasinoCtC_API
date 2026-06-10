@@ -1,0 +1,118 @@
+package com.CasinoCtC.CCtCAPI.dao;
+
+import com.CasinoCtC.CCtCAPI.dto.TransactionInquiryResponse;
+import com.CasinoCtC.CCtCAPI.dto.TransactionSearchRequest;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Repository
+@RequiredArgsConstructor
+public class TransactionInquiryDAOImpl
+implements TransactionInquiryDAO {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    @Override
+    public List<TransactionInquiryResponse> searchTransactions(
+            TransactionSearchRequest request) {
+
+        StringBuilder sql = new StringBuilder("""
+            SELECT
+                t.TransactionID,
+                t.BusinessDate,
+                t.CollectionDate,
+                t.BoxNumber,
+                u.UserName,
+                l.Location_Name,
+                t.Status,
+                t.TotalCurrency,
+                t.TotalTktAmount,
+                t.TotalAmount,
+                t.CreatedDate
+            FROM GSI.[TRANSACTION] t
+            JOIN GSI.USERS u
+                ON t.UserID = u.UserID
+            JOIN GSI.LOCATIONS l
+                ON t.LocationID = l.LocationID
+            WHERE 1=1
+        """);
+
+        List<Object> params = new ArrayList<>();
+
+        if (request.getBoxNumber() != null &&
+            !request.getBoxNumber().isBlank()) {
+
+            sql.append(" AND t.BoxNumber = ?");
+            params.add(request.getBoxNumber());
+        }
+
+        if (request.getBusinessDate() != null &&
+            !request.getBusinessDate().isBlank()) {
+
+            sql.append(" AND t.BusinessDate = ?");
+            params.add(request.getBusinessDate());
+        }
+
+        if (request.getStatus() != null &&
+            !request.getStatus().isBlank()) {
+
+            sql.append(" AND t.Status = ?");
+            params.add(request.getStatus());
+        }
+
+        sql.append("""
+            ORDER BY t.TransactionID DESC
+        """);
+
+        return jdbcTemplate.query(
+            sql.toString(),
+            params.toArray(),
+            (rs, rowNum) -> {
+
+                TransactionInquiryResponse r =
+                    new TransactionInquiryResponse();
+
+                r.setTransactionId(
+                    rs.getLong("TransactionID"));
+
+                r.setBusinessDate(
+                    rs.getString("BusinessDate"));
+
+                r.setCollectionDate(
+                    rs.getString("CollectionDate"));
+
+                r.setBoxNumber(
+                    rs.getString("BoxNumber"));
+
+                r.setUsername(
+                    rs.getString("UserName"));
+
+                r.setLocationName(
+                    rs.getString("Location_Name"));
+
+                r.setStatus(
+                    rs.getString("Status"));
+
+                r.setTotalCurrency(
+                    rs.getBigDecimal("TotalCurrency"));
+
+                r.setTotalTktAmount(
+                    rs.getBigDecimal("TotalTktAmount"));
+
+                r.setTotalAmount(
+                    rs.getBigDecimal("TotalAmount"));
+
+                r.setCreatedDate(
+                    rs.getTimestamp("CreatedDate"));
+
+                return r;
+            }
+        );
+    }
+}

@@ -1,0 +1,43 @@
+package com.CasinoCtC.CCtCAPI.model;
+
+public class Menu {
+
+    private Long id;
+    private String name;
+    private String route;
+    private Long parentMenuID;
+
+    public Menu() {}
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getRoute() {
+        return route;
+    }
+
+    public void setRoute(String route) {
+        this.route = route;
+    }
+    
+    public Long getParentMenuID() {
+        return id;
+    }
+
+    public void setParentMenuID(Long id) {
+        this.id = id;
+    }
+}

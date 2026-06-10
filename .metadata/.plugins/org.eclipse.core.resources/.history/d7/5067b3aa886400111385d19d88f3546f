@@ -1,0 +1,19 @@
+package com.CasinoCtC.CCtCAPI.dto;
+
+import lombok.Data;
+
+@Data
+public class TransactionSearchRequest {
+
+    private String businessDate;
+
+    private String collectionDate;
+
+    private String boxNumber;
+
+    private String status;
+
+    private Integer locationId;
+
+    private String username;
+}

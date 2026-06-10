@@ -1,0 +1,273 @@
+package com.CasinoCtC.CCtCAPI.dao;
+
+import com.CasinoCtC.CCtCAPI.dto.TransactionInquiryResponse;
+import com.CasinoCtC.CCtCAPI.dto.TransactionSearchRequest;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+@Repository
+@RequiredArgsConstructor
+public class TransactionInquiryDAOImpl
+implements TransactionInquiryDAO {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    @Override
+    public List<TransactionInquiryResponse> searchTransactions(
+            TransactionSearchRequest request) {
+
+        StringBuilder sql = new StringBuilder("""
+            SELECT
+                t.TransactionID,
+                t.BusinessDate,
+                t.CollectionDate,
+                t.BoxNumber,
+                u.UserName,
+                l.Location_Name,
+                t.Status,
+                t.TotalCurrency,
+                t.TotalTktAmount,
+                t.TotalAmount,
+                t.CreatedDate
+            FROM GSI.[TRANSACTION] t
+            JOIN GSI.USERS u
+                ON t.UserID = u.UserID
+            JOIN GSI.LOCATIONS l
+                ON t.LocationID = l.LocationID
+            WHERE 1 = 1
+        """);
+
+        List<Object> params = new ArrayList<>();
+
+        /*
+         * =========================================
+         * BUSINESS DATE RANGE
+         * =========================================
+         */
+
+        if (request.getBusinessDateFrom() != null &&
+            !request.getBusinessDateFrom().isBlank()) {
+
+            sql.append("""
+                AND t.BusinessDate >= ?
+            """);
+
+            params.add(
+                request.getBusinessDateFrom()
+            );
+        }
+
+        if (request.getBusinessDateTo() != null &&
+            !request.getBusinessDateTo().isBlank()) {
+
+            sql.append("""
+                AND t.BusinessDate <= ?
+            """);
+
+            params.add(
+                request.getBusinessDateTo()
+            );
+        }
+
+        /*
+         * =========================================
+         * BOX NUMBER RANGE
+         * =========================================
+         */
+
+        if (request.getBoxNumberFrom() != null &&
+            !request.getBoxNumberFrom().isBlank()) {
+
+            sql.append("""
+                AND t.BoxNumber >= ?
+            """);
+
+            params.add(
+                request.getBoxNumberFrom()
+            );
+        }
+
+        if (request.getBoxNumberTo() != null &&
+            !request.getBoxNumberTo().isBlank()) {
+
+            sql.append("""
+                AND t.BoxNumber <= ?
+            """);
+
+            params.add(
+                request.getBoxNumberTo()
+            );
+        }
+
+        /*
+         * =========================================
+         * STATUS
+         * =========================================
+         */
+
+        if (request.getStatus() != null &&
+            !request.getStatus().isBlank()) {
+
+            sql.append("""
+                AND t.Status = ?
+            """);
+
+            params.add(
+                request.getStatus()
+            );
+        }
+
+        /*
+         * =========================================
+         * SORTING
+         * =========================================
+         */
+
+        Map<String, String> sortableColumns = Map.of(
+            "transactionId", "t.TransactionID",
+            "businessDate", "t.BusinessDate",
+            "boxNumber", "t.BoxNumber",
+            "username", "u.UserName",
+            "status", "t.Status",
+            "totalAmount", "t.TotalAmount"
+        );
+
+        String requestedSortColumn =
+        	    request.getSortColumn();
+
+        if (requestedSortColumn == null ||
+        	    requestedSortColumn.isBlank()) {
+
+        	    requestedSortColumn =
+        	        "businessDate";
+        }
+
+       	String sortColumn =
+        	    sortableColumns.getOrDefault(
+        	        requestedSortColumn,
+        	        "t.BusinessDate"
+        );
+
+       	String requestedSortDirection =
+       		    request.getSortDirection();
+
+       		if (requestedSortDirection == null ||
+       		    requestedSortDirection.isBlank()) {
+
+       		    requestedSortDirection = "DESC";
+       		}
+
+       		String sortDirection =
+       		    "ASC".equalsIgnoreCase(
+       		        requestedSortDirection
+       		    )
+       		    ? "ASC"
+       		    : "DESC";
+
+
+        sql.append("""
+            ORDER BY
+        """);
+
+        sql.append(sortColumn)
+           .append(" ")
+           .append(sortDirection);
+
+        /*
+         * =========================================
+         * PAGINATION
+         * =========================================
+         */
+
+        int pageNumber =
+            request.getPageNumber() != null
+            ? request.getPageNumber()
+            : 0;
+
+        int pageSize =
+            request.getPageSize() != null
+            ? request.getPageSize()
+            : 20;
+
+        int offset =
+            pageNumber * pageSize;
+
+        sql.append("""
+            OFFSET ? ROWS
+            FETCH NEXT ? ROWS ONLY
+        """);
+
+        params.add(offset);
+
+        params.add(pageSize);
+
+        /*
+         * =========================================
+         * EXECUTE QUERY
+         * =========================================
+         */
+
+        return jdbcTemplate.query(
+            sql.toString(),
+            params.toArray(),
+            (rs, rowNum) -> {
+
+                TransactionInquiryResponse response =
+                    new TransactionInquiryResponse();
+
+                response.setTransactionId(
+                    rs.getLong("TransactionID")
+                );
+
+                response.setBusinessDate(
+                    rs.getString("BusinessDate")
+                );
+
+                response.setCollectionDate(
+                    rs.getString("CollectionDate")
+                );
+
+                response.setBoxNumber(
+                    rs.getString("BoxNumber")
+                );
+
+                response.setUsername(
+                    rs.getString("UserName")
+                );
+
+                response.setLocationName(
+                    rs.getString("Location_Name")
+                );
+
+                response.setStatus(
+                    rs.getString("Status")
+                );
+
+                response.setTotalCurrency(
+                    rs.getBigDecimal("TotalCurrency")
+                );
+
+                response.setTotalTktAmount(
+                    rs.getBigDecimal("TotalTktAmount")
+                );
+
+                response.setTotalAmount(
+                    rs.getBigDecimal("TotalAmount")
+                );
+
+                response.setCreatedDate(
+                    rs.getTimestamp("CreatedDate")
+                );
+
+                return response;
+            }
+        );
+    }
+}
