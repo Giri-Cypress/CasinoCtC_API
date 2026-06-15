@@ -1,0 +1,11 @@
+import java.util.Map;
+
+public interface TransactionInquiryService {
+
+    List<TransactionInquiryResponse> searchTransactions(
+        TransactionSearchRequest request
+    );
+
+    // ✅ ADD THIS
+    Map<String, Object> getTransactionById(Long id);
+}

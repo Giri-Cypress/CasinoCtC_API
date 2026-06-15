@@ -1,273 +1,251 @@
 package com.CasinoCtC.CCtCAPI.dao;
 
+import com.CasinoCtC.CCtCAPI.dao.TransactionInquiryDAO;
 import com.CasinoCtC.CCtCAPI.dto.TransactionInquiryResponse;
 import com.CasinoCtC.CCtCAPI.dto.TransactionSearchRequest;
 
-import lombok.RequiredArgsConstructor;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+
+
+
 @Repository
-@RequiredArgsConstructor
-public class TransactionInquiryDAOImpl
-implements TransactionInquiryDAO {
+public class TransactionInquiryDAOImpl implements TransactionInquiryDAO {
 
-    private final JdbcTemplate jdbcTemplate;
-
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    /*
+     * =========================================
+     * SEARCH TRANSACTIONS (ALREADY EXISTING)
+     * =========================================
+     */
     @Override
     public List<TransactionInquiryResponse> searchTransactions(
             TransactionSearchRequest request) {
-
-        StringBuilder sql = new StringBuilder("""
+    	System.out.println("✅ DAO METHOD CALLED: SearchTransaction()");
+        String sql = """
             SELECT
                 t.TransactionID,
                 t.BusinessDate,
                 t.CollectionDate,
                 t.BoxNumber,
                 u.UserName,
-                l.Location_Name,
                 t.Status,
-                t.TotalCurrency,
-                t.TotalTktAmount,
-                t.TotalAmount,
-                t.CreatedDate
+                t.TotalAmount
             FROM GSI.[TRANSACTION] t
             JOIN GSI.USERS u
                 ON t.UserID = u.UserID
-            JOIN GSI.LOCATIONS l
-                ON t.LocationID = l.LocationID
             WHERE 1 = 1
-        """);
+        """;
 
         List<Object> params = new ArrayList<>();
+    	MapSqlParameterSource params1 = new MapSqlParameterSource();
+    	params1.addValue("fromDate", request.getBusinessDateFrom());
+    	params1.addValue("toDate", request.getBusinessDateTo());
 
-        /*
-         * =========================================
-         * BUSINESS DATE RANGE
-         * =========================================
-         */
+        // ✅ Business Date From
 
-        if (request.getBusinessDateFrom() != null &&
-            !request.getBusinessDateFrom().isBlank()) {
+		if (request.getBusinessDateFrom() != null) {
+		    sql = sql + (" AND t.BusinessDate >= :fromBusDate");
+	    	params1.addValue("fromBusDate", request.getBusinessDateFrom());
+//		    params.add(request.getBusinessDateFrom());
+		}
 
-            sql.append("""
-                AND t.BusinessDate >= ?
+
+        // ✅ Business Date To
+
+		if (request.getBusinessDateTo() != null) {
+			sql = sql +(" AND t.BusinessDate <= :toBusDate");
+	    	params1.addValue("toBusDate", request.getBusinessDateTo());
+//			params.add(request.getBusinessDateTo());
+		}
+		
+
+		// ✅ Collection Date From
+
+		if (request.getCollectionDateFrom() != null) {
+		    sql = sql + (" AND t.CollectionDate >= :fromCollctDate");
+	    	params1.addValue("fromCollctDate", request.getCollectionDateFrom());
+//		    params.add(request.getBusinessDateFrom());
+		}
+
+
+        // ✅ Collection Date To
+
+		if (request.getCollectionDateTo() != null) {
+			sql = sql +(" AND t.CollectionDate <= :toCollctDate");
+	    	params1.addValue("toCollctDate", request.getCollectionDateTo());
+//			params.add(request.getBusinessDateTo());
+		}
+
+
+        // ✅ Box Number From
+        if (request.getBoxNumberFrom() != null && !request.getBoxNumberFrom().isEmpty()) {
+            sql = sql + " AND t.BoxNumber >= :fromBoxNo";
+	    	params1.addValue("fromBoxNo", request.getBoxNumberFrom());
+//            params.add(request.getBoxNumberFrom());
+        }
+
+        // ✅ Box Number To
+        if (request.getBoxNumberTo() != null && !request.getBoxNumberTo().isEmpty()) {
+            sql = sql + " AND t.BoxNumber <= :toBoxNo";
+	    	params1.addValue("toBoxNo", request.getBoxNumberTo());
+//            params.add(request.getBoxNumberTo());
+        }
+
+
+        // ✅ Status
+        if (request.getStatus() != null && !request.getStatus().isEmpty()) {
+            sql = sql + " AND t.Status = :status";
+            params1.addValue("status", request.getStatus());   
+            //params.add(request.getStatus());
+        }
+     
+
+        // ✅ User ID (via USERS table)
+        if (request.getUserId() != null ) {
+            sql = sql + " AND u.UserId = ?";
+            params.add(request.getUserId());
+        }
+
+
+        if (request.getTicketId() != null && !request.getTicketId().isEmpty()) {
+            sql= sql +("""
+                AND EXISTS (
+                    SELECT 1
+                    FROM GSI.TicketDetails td
+                    WHERE td.TransactionID = t.TransactionID
+                    AND td.TicketID = ?
+                )
             """);
-
-            params.add(
-                request.getBusinessDateFrom()
-            );
+            params.add(request.getTicketId());
         }
 
-        if (request.getBusinessDateTo() != null &&
-            !request.getBusinessDateTo().isBlank()) {
+        // ✅ Debug (optional, remove later)
+        System.out.println("Final SQL: " + sql);
+        System.out.println("Params: " + params);
+        
+        try {
 
-            sql.append("""
-                AND t.BusinessDate <= ?
-            """);
+        	return namedParameterJdbcTemplate.query(
+        			sql,
+        			params1,
+        			new BeanPropertyRowMapper<TransactionInquiryResponse>(TransactionInquiryResponse.class)
+        	);
+		} catch (Exception e) {
+		    e.printStackTrace();   // ✅ THIS WILL SHOW REAL ERROR
+		    throw e;
+		}
 
-            params.add(
-                request.getBusinessDateTo()
-            );
-        }
+    }
+
+    /*
+     * =========================================
+     * GET TRANSACTION BY ID (FINAL)
+     * =========================================
+     */
+    @Override
+    public Map<String, Object> getTransactionById(Long id) {
+       	System.out.println("✅ DAO METHOD CALLED: getTransactionById");
+    try {    
+        Map<String, Object> result = new HashMap<>();
 
         /*
-         * =========================================
-         * BOX NUMBER RANGE
-         * =========================================
+         * -----------------------------------------
+         * HEADER QUERY
+         * -----------------------------------------
          */
+        String headerSql = """
+            SELECT
+                t.TransactionID,
+                t.BusinessDate,
+                t.CollectionDate,
+                t.BoxNumber,
+                u.UserName,
+                t.Status,
+                t.TotalCurrency,
+                t.TotalTktAmount,
+                t.TotalAmount
+            FROM GSI.[TRANSACTION] t
+            JOIN GSI.USERS u
+                ON t.UserID = u.UserID
+            WHERE t.TransactionID = ?
+        """;
 
-        if (request.getBoxNumberFrom() != null &&
-            !request.getBoxNumberFrom().isBlank()) {
+        Map<String, Object> header =
+                jdbcTemplate.queryForMap(headerSql, id);
 
-            sql.append("""
-                AND t.BoxNumber >= ?
-            """);
-
-            params.add(
-                request.getBoxNumberFrom()
-            );
-        }
-
-        if (request.getBoxNumberTo() != null &&
-            !request.getBoxNumberTo().isBlank()) {
-
-            sql.append("""
-                AND t.BoxNumber <= ?
-            """);
-
-            params.add(
-                request.getBoxNumberTo()
-            );
-        }
+        result.putAll(header);
 
         /*
-         * =========================================
-         * STATUS
-         * =========================================
+         * -----------------------------------------
+         * CURRENCY DETAILS
+         * -----------------------------------------
          */
+        String currencySql = """
+            SELECT
+                DenomId,
+                Count,
+                Amount
+            FROM GSI.TRANSACTION_CURRENCY
+            WHERE TransactionID = ?
+            ORDER BY DenomId
+        """;
 
-        if (request.getStatus() != null &&
-            !request.getStatus().isBlank()) {
+        List<Map<String, Object>> currencyList =
+                jdbcTemplate.queryForList(currencySql, id);
 
-            sql.append("""
-                AND t.Status = ?
-            """);
-
-            params.add(
-                request.getStatus()
-            );
-        }
+        result.put("currencyDetails", currencyList);
 
         /*
-         * =========================================
-         * SORTING
-         * =========================================
+         * -----------------------------------------
+         * TICKET DETAILS
+         * -----------------------------------------
          */
+        String ticketSql = """
+            SELECT
+                TicketID,
+                Amount
+            FROM GSI.TRANSACTION_TICKET
+            WHERE TransactionID = ?
+            ORDER BY TicketID
+        """;
 
-        Map<String, String> sortableColumns = Map.of(
-            "transactionId", "t.TransactionID",
-            "businessDate", "t.BusinessDate",
-            "boxNumber", "t.BoxNumber",
-            "username", "u.UserName",
-            "status", "t.Status",
-            "totalAmount", "t.TotalAmount"
-        );
+        List<Map<String, Object>> ticketList =
+                jdbcTemplate.queryForList(ticketSql, id);
 
-        String requestedSortColumn =
-        	    request.getSortColumn();
-
-        if (requestedSortColumn == null ||
-        	    requestedSortColumn.isBlank()) {
-
-        	    requestedSortColumn =
-        	        "businessDate";
-        }
-
-       	String sortColumn =
-        	    sortableColumns.getOrDefault(
-        	        requestedSortColumn,
-        	        "t.BusinessDate"
-        );
-
-       	String requestedSortDirection =
-       		    request.getSortDirection();
-
-       		if (requestedSortDirection == null ||
-       		    requestedSortDirection.isBlank()) {
-
-       		    requestedSortDirection = "DESC";
-       		}
-
-       		String sortDirection =
-       		    "ASC".equalsIgnoreCase(
-       		        requestedSortDirection
-       		    )
-       		    ? "ASC"
-       		    : "DESC";
-
-
-        sql.append("""
-            ORDER BY
-        """);
-
-        sql.append(sortColumn)
-           .append(" ")
-           .append(sortDirection);
+        result.put("ticketDetails", ticketList);
 
         /*
-         * =========================================
-         * PAGINATION
-         * =========================================
+         * -----------------------------------------
+         * FINAL RESPONSE
+         * -----------------------------------------
          */
+        return result;
+    } catch (Exception ex) {
 
-        int pageNumber =
-            request.getPageNumber() != null
-            ? request.getPageNumber()
-            : 0;
+        // ✅ FULL ERROR LOGGING
+        System.out.println("🔥 ERROR in getTransactionById()");
+        System.out.println("👉 Transaction ID: " + id);
+        System.out.println("👉 Error Message: " + ex.getMessage());
 
-        int pageSize =
-            request.getPageSize() != null
-            ? request.getPageSize()
-            : 20;
+        ex.printStackTrace();  // ✅ VERY IMPORTANT
+        throw ex;              // ✅ rethrow so frontend sees error
 
-        int offset =
-            pageNumber * pageSize;
-
-        sql.append("""
-            OFFSET ? ROWS
-            FETCH NEXT ? ROWS ONLY
-        """);
-
-        params.add(offset);
-
-        params.add(pageSize);
-
-        /*
-         * =========================================
-         * EXECUTE QUERY
-         * =========================================
-         */
-
-        return jdbcTemplate.query(
-            sql.toString(),
-            params.toArray(),
-            (rs, rowNum) -> {
-
-                TransactionInquiryResponse response =
-                    new TransactionInquiryResponse();
-
-                response.setTransactionId(
-                    rs.getLong("TransactionID")
-                );
-
-                response.setBusinessDate(
-                    rs.getString("BusinessDate")
-                );
-
-                response.setCollectionDate(
-                    rs.getString("CollectionDate")
-                );
-
-                response.setBoxNumber(
-                    rs.getString("BoxNumber")
-                );
-
-                response.setUsername(
-                    rs.getString("UserName")
-                );
-
-                response.setLocationName(
-                    rs.getString("Location_Name")
-                );
-
-                response.setStatus(
-                    rs.getString("Status")
-                );
-
-                response.setTotalCurrency(
-                    rs.getBigDecimal("TotalCurrency")
-                );
-
-                response.setTotalTktAmount(
-                    rs.getBigDecimal("TotalTktAmount")
-                );
-
-                response.setTotalAmount(
-                    rs.getBigDecimal("TotalAmount")
-                );
-
-                response.setCreatedDate(
-                    rs.getTimestamp("CreatedDate")
-                );
-
-                return response;
-            }
-        );
+    	}
+    
     }
 }

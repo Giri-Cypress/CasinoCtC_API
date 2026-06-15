@@ -1,0 +1,130 @@
+package com.CasinoCtC.CCtCAPI.dao;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import com.CasinoCtC.CCtCAPI.model.Location;
+
+@Repository
+public class LocationDAOImpl implements LocationDAO {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Override
+    public List<Location> findAll() {
+        String sql = "SELECT * FROM GSI.LOCATIONS";
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Location loc = new Location();
+            loc.setLocationId(rs.getInt("LocationID"));
+            loc.setLocationName(rs.getString("Location_Name"));
+            loc.setAddress1(rs.getString("Address1"));
+            loc.setAddress2(rs.getString("Address2"));
+            loc.setCity(rs.getString("City"));
+            loc.setState(rs.getString("State"));
+            loc.setZip(rs.getString("Zip"));
+            loc.setStatus(rs.getInt("Status"));
+            return loc;
+        });
+    }
+
+    @Override
+    public Optional<Location> findById(Integer id) {
+        String sql = "SELECT * FROM GSI.LOCATIONS WHERE LocationID = ?";
+
+        List<Location> list = jdbcTemplate.query(
+            sql,
+            new Object[]{id},
+            (rs, rowNum) -> {
+                Location loc = new Location();
+                loc.setLocationId(rs.getInt("LocationID"));
+                loc.setLocationName(rs.getString("Location_Name"));
+                loc.setAddress1(rs.getString("Address1"));
+                loc.setAddress2(rs.getString("Address2"));
+                loc.setCity(rs.getString("City"));
+                loc.setState(rs.getString("State"));
+                loc.setZip(rs.getString("Zip"));
+                loc.setStatus(rs.getInt("Status"));
+                return loc;
+            }
+        );
+
+        return list.stream().findFirst();
+    }
+
+    @Override
+    public Location save(Location location) {
+    
+    	try {
+        String checkSql = "SELECT COUNT(*) FROM GSI.LOCATIONS WHERE LocationID = ?";
+        Integer count = jdbcTemplate.queryForObject(
+            checkSql,
+            Integer.class,
+            location.getLocationId()
+        );
+
+        if (count != null && count > 0) {
+            // UPDATE existing row
+            String updateSql =
+                "UPDATE GSI.LOCATIONS SET " +
+                "Location_Name = ?, " +
+                "Address1 = ?, " +
+                "Address2 = ?, " +
+                "City = ?, " +
+                "State = ?, " +
+                "Zip = ?, " +
+                "Status = ? " +
+                "WHERE LocationID = ?";
+
+            jdbcTemplate.update(
+                updateSql,
+                location.getLocationName(),
+                location.getAddress1(),
+                location.getAddress2(),
+                location.getCity(),
+                location.getState(),
+                location.getZip(),
+                location.getStatus(),
+                location.getLocationId()
+            );
+        } else {
+            // INSERT new row using user-entered LocationID
+            String insertSql =
+                "INSERT INTO GSI.LOCATIONS " +
+                "(LocationID, Location_Name, Address1, Address2, City, State, Zip, Status) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+            jdbcTemplate.update(
+                insertSql,
+                location.getLocationId(),
+                location.getLocationName(),
+                location.getAddress1(),
+                location.getAddress2(),
+                location.getCity(),
+                location.getState(),
+                location.getZip(),
+                location.getStatus()
+            );
+        }
+
+        return findById(location.getLocationId()).orElse(location);
+    	} catch (Exception ex)
+    	{
+    		System.out.println("❌ ERROR SAVING TRANSACTION");
+
+    		ex.printStackTrace();
+		
+    	}
+    }
+
+    @Override
+    public void deleteById(Integer id) {
+        String sql = "DELETE FROM GSI.LOCATIONS WHERE LocationID = ?";
+        jdbcTemplate.update(sql, id);
+    }
+}

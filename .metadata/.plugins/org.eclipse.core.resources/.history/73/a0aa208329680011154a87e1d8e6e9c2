@@ -1,0 +1,50 @@
+package com.CasinoCtC.CCtCAPI.dao;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Repository;
+
+import com.CasinoCtC.CCtCAPI.model.Location;
+
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+
+
+@Repository
+@Transactional
+public class LocationDAOImpl implements LocationDAO {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Override
+    public List<Location> findAll() {
+        return entityManager
+                .createQuery("FROM Location", Location.class)
+                .getResultList();
+    }
+
+    @Override
+    public Optional<Location> findById(Integer id) {
+        Location loc = entityManager.find(Location.class, id);
+        return Optional.ofNullable(loc);
+    }
+
+    @Override
+    public Location save(Location location) {
+        return entityManager.merge(location);
+    }
+
+    @Override
+    public void deleteById(Integer id) {
+
+        Location loc = entityManager.find(Location.class, id);
+
+        if (loc != null) {
+            entityManager.remove(loc);
+        }
+    }
+}

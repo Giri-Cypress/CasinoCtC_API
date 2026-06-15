@@ -1,0 +1,108 @@
+package com.CasinoCtC.CCtCAPI.dao;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import com.CasinoCtC.CCtCAPI.model.Location;
+
+@Repository
+public class LocationDAOImpl implements LocationDAO {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    // ✅ GET ALL LOCATIONS
+    @Override
+    public List<Location> findAll() {
+
+        String sql = "SELECT * FROM LOCATIONS";
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+
+            Location loc = new Location();
+
+            loc.setLocationId(rs.getInt("LocationID"));
+            loc.setLocationName(rs.getString("Location_Name"));
+            loc.setCity(rs.getString("City"));
+            loc.setState(rs.getString("State"));
+            loc.setZip(rs.getString("Zip"));
+            loc.setStatus(rs.getInt("Status"));
+
+            return loc;
+        });
+    }
+
+    // ✅ GET BY ID
+    @Override
+    public Optional<Location> findById(Integer id) {
+
+        String sql = "SELECT * FROM LOCATIONS WHERE LocationID = ?";
+
+        List<Location> list = jdbcTemplate.query(
+                sql,
+                new Object[]{id},
+                (rs, rowNum) -> {
+
+                    Location loc = new Location();
+
+                    loc.setLocationId(rs.getInt("LocationID"));
+                    loc.setLocationName(rs.getString("Location_Name"));
+                    loc.setCity(rs.getString("City"));
+                    loc.setState(rs.getString("State"));
+                    loc.setZip(rs.getString("Zip"));
+                    loc.setStatus(rs.getInt("Status"));
+
+                    return loc;
+                });
+
+        return list.stream().findFirst();
+    }
+
+    // ✅ CREATE / UPDATE LOCATION
+    @Override
+    public Location save(Location location) {
+
+        if (location.getLocationId() == 0) {
+            // ✅ INSERT
+
+            String sql = "INSERT INTO LOCATIONS (Location_Name, City, State, Zip, Status) VALUES (?, ?, ?, ?, ?)";
+
+            jdbcTemplate.update(sql,
+                    location.getLocationName(),
+                    location.getCity(),
+                    location.getState(),
+                    location.getZip(),
+                    location.getStatus()
+            );
+
+        } else {
+            // ✅ UPDATE
+
+            String sql = "UPDATE LOCATIONS SET Location_Name = ?, City = ?, State = ?, Zip = ?, Status = ? WHERE LocationID = ?";
+
+            jdbcTemplate.update(sql,
+                    location.getLocationName(),
+                    location.getCity(),
+                    location.getState(),
+                    location.getZip(),
+                    location.getStatus(),
+                    location.getLocationId()
+            );
+        }
+
+        return location;
+    }
+
+    // ✅ DELETE LOCATION
+    @Override
+    public void deleteById(Integer id) {
+
+        String sql = "DELETE FROM LOCATIONS WHERE LocationID = ?";
+
+        jdbcTemplate.update(sql, id);
+    }
+}

@@ -1,0 +1,18 @@
+package com.CasinoCtC.CCtCAPI.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.CasinoCtC.CCtCAPI.dto.TransactionInquiryResponse;
+import com.CasinoCtC.CCtCAPI.dto.TransactionSearchRequest;
+
+public interface TransactionInquiryService {
+
+    List<TransactionInquiryResponse> searchTransactions(
+        TransactionSearchRequest request
+    );
+
+    // ✅ ADD THIS
+    Map<String, Object> getTransactionById(Long id);
+}
+

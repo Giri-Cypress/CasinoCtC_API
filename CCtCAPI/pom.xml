@@ -29,7 +29,8 @@
     </properties>
 
     <dependencies>
-
+    
+    
         <!-- Spring Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -46,7 +47,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jdbc</artifactId>
-        </dependency>
+        </dependency> 
 
         <!-- Validation -->
         <dependency>

@@ -1,0 +1,52 @@
+package com.CasinoCtC.CCtCAPI.service.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.CasinoCtC.CCtCAPI.dao.TransactionInquiryDAO;
+import com.CasinoCtC.CCtCAPI.dto.TransactionInquiryResponse;
+import com.CasinoCtC.CCtCAPI.dto.TransactionSearchRequest;
+import com.CasinoCtC.CCtCAPI.service.TransactionInquiryService;
+
+@Service
+public class TransactionInquiryServiceImpl
+implements TransactionInquiryService {
+
+    /*
+     * =========================================
+     * INJECT DAO
+     * =========================================
+     */
+    @Autowired
+    private TransactionInquiryDAO transactionInquiryDAO;
+
+    /*
+     * =========================================
+     * SEARCH (EXISTING)
+     * =========================================
+     */
+    @Override
+    public List<TransactionInquiryResponse> searchTransactions(
+            TransactionSearchRequest request) {
+
+        return transactionInquiryDAO.searchTransactions(request);
+    }
+
+    /*
+     * =========================================
+     * GET TRANSACTION BY ID (FINAL FIX)
+     * =========================================
+     */
+    @Override
+    public Map<String, Object> getTransactionById(Long id) {
+
+        // ✅ DEBUG LOG (VERY IMPORTANT)
+        System.out.println("✅ SERVICE: getTransactionById called with ID = " + id);
+
+        // ✅ CALL CORRECT DAO METHOD
+        return transactionInquiryDAO.getTransactionById(id);
+    }
+}

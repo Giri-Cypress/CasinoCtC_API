@@ -1,0 +1,12 @@
+package com.CasinoCtC.CCtCAPI.dto;
+
+import lombok.Data;
+
+@Data
+public class TicketDTO {
+
+    private String ticketid;
+
+    private Double amount;
+
+}

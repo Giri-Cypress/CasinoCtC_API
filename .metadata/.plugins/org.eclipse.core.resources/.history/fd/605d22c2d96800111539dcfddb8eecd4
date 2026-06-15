@@ -1,0 +1,16 @@
+package com.CasinoCtC.CCtCAPI.service;
+
+import java.util.List;
+
+import com.CasinoCtC.CCtCAPI.model.Location;
+
+public interface LocationService {
+
+    List<Location> getAllLocations();
+
+    Location getLocationById(int id);
+
+    Location saveLocation(Location location);
+
+    void deleteLocation(int id);
+}

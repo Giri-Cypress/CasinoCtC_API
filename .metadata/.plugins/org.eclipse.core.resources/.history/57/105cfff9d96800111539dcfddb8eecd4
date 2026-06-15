@@ -1,0 +1,53 @@
+package com.CasinoCtC.CCtCAPI.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import com.CasinoCtC.CCtCAPI.model.Location;
+import com.CasinoCtC.CCtCAPI.service.LocationService;
+
+@RestController
+@RequestMapping("/api/locations")
+public class LocationController {
+
+    @Autowired
+    private LocationService locationService;
+
+    // ✅ GET ALL LOCATIONS
+    @GetMapping
+    public List<Location> getAllLocations() {
+        return locationService.getAllLocations();
+    }
+
+    // ✅ GET LOCATION BY ID
+    @GetMapping("/{id}")
+    public Location getLocationById(@PathVariable int id) {
+        return locationService.getLocationById(id);
+    }
+
+    // ✅ CREATE LOCATION
+    @PostMapping
+    public Location createLocation(@RequestBody Location location) {
+        return locationService.saveLocation(location);
+    }
+
+    // ✅ UPDATE LOCATION
+    @PutMapping("/{id}")
+    public Location updateLocation(@PathVariable int id,
+                                   @RequestBody Location location) {
+
+        location.setLocationId(id);  // ✅ ensure correct ID
+        return locationService.saveLocation(location);
+    }
+
+    // ✅ DELETE LOCATION
+    @DeleteMapping("/{id}")
+
+	public void deleteLocation(@PathVariable int id) {
+	    locationService.deleteLocation(id);
+	}
+
+
+}

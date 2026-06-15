@@ -1,6 +1,7 @@
 package com.CasinoCtC.CCtCAPI.controller;
 
 import com.CasinoCtC.CCtCAPI.dto.TransactionRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import com.CasinoCtC.CCtCAPI.dto.TransactionSearchRequest;
 import com.CasinoCtC.CCtCAPI.service.TransactionInquiryService;
 import com.CasinoCtC.CCtCAPI.service.TransactionService;
@@ -16,22 +17,34 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/transactions")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
+
 public class TransactionController {
 
-    private final TransactionService transactionService;
+        @Autowired
+      private TransactionService transactionService;
 
-    private final TransactionInquiryService transactionInquiryService;
- 
+      /*
+       * =========================================
+       * NEW INQUIRY SERVICE (FOR VIEW DETAILS)
+       * =========================================
+       */
+      @Autowired
+      private TransactionInquiryService transactionInquiryService;
 
-	@GetMapping("/{id}")
-	public ResponseEntity<?> getTransactionById(
-	        @PathVariable Long id) {
-	
-	    return ResponseEntity.ok(
-	        transactionService.getTransactionById(id)
-	    );
-	}
+
+@GetMapping("/{id}")
+public ResponseEntity<?> getTransactionById(
+        @PathVariable Long id) {   // ✅ THIS FIXES 400
+
+    System.out.println("🔥 CONTROLLER HIT: getTransactionById ID = " + id);
+
+    return ResponseEntity.ok(
+        transactionInquiryService.getTransactionById(id)
+    );
+}
+
+
+
 
     /**
      * =========================================

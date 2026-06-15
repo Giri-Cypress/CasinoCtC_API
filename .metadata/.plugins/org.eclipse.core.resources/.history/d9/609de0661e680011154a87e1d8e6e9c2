@@ -1,0 +1,5 @@
+package com.CasinoCtC.CCtCAPI.controller;
+
+public class LocationController {
+
+}

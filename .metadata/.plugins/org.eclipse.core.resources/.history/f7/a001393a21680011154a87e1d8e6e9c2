@@ -1,0 +1,17 @@
+package com.CasinoCtC.CCtCAPI.dao;
+
+import java.util.List;
+import java.util.Optional;
+
+import com.CasinoCtC.CCtCAPI.model.Location;
+
+public interface LocationDAO {
+
+    List<Location> findAll();
+
+    Optional<Location> findById(Integer id);
+
+    Location save(Location location);
+
+    void deleteById(Integer id);
+}

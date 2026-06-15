@@ -1,0 +1,137 @@
+package com.CasinoCtC.CCtCAPI.dao;
+
+import com.CasinoCtC.CCtCAPI.dao.TransactionInquiryDAO;
+import com.CasinoCtC.CCtCAPI.dto.TransactionInquiryResponse;
+import com.CasinoCtC.CCtCAPI.dto.TransactionSearchRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Repository
+public class TransactionInquiryDAOImpl implements TransactionInquiryDAO {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    /*
+     * =========================================
+     * SEARCH TRANSACTIONS (ALREADY EXISTING)
+     * =========================================
+     */
+    @Override
+    public List<TransactionInquiryResponse> searchTransactions(
+            TransactionSearchRequest request) {
+
+        String sql = """
+            SELECT
+                t.TransactionID,
+                t.BusinessDate,
+                t.BoxNumber,
+                u.UserName,
+                t.Status,
+                t.TotalAmount
+            FROM GSI.[TRANSACTION] t
+            JOIN GSI.USERS u
+                ON t.UserID = u.UserID
+            WHERE 1 = 1
+        """;
+
+        // NOTE: You already have dynamic filtering logic here
+        // This is kept simple for clarity
+
+        return jdbcTemplate.query(
+            sql,
+            new BeanPropertyRowMapper<>(TransactionInquiryResponse.class)
+        );
+    }
+
+    /*
+     * =========================================
+     * GET TRANSACTION BY ID (FINAL)
+     * =========================================
+     */
+    @Override
+    public Map<String, Object> getTransactionById(Long id) {
+
+        Map<String, Object> result = new HashMap<>();
+
+        /*
+         * -----------------------------------------
+         * HEADER QUERY
+         * -----------------------------------------
+         */
+        String headerSql = """
+            SELECT
+                t.TransactionID,
+                t.BusinessDate,
+                t.CollectionDate,
+                t.BoxNumber,
+                u.UserName,
+                t.Status,
+                t.TotalCurrency,
+                t.TotalTktAmount,
+                t.TotalAmount
+            FROM GSI.[TRANSACTION] t
+            JOIN GSI.USERS u
+                ON t.UserID = u.UserID
+            WHERE t.TransactionID = ?
+        """;
+
+        Map<String, Object> header =
+                jdbcTemplate.queryForMap(headerSql, id);
+
+        result.putAll(header);
+
+        /*
+         * -----------------------------------------
+         * CURRENCY DETAILS
+         * -----------------------------------------
+         */
+        String currencySql = """
+            SELECT
+                Denomination,
+                Count,
+                Amount
+            FROM GSI.TRANSACTION_CURRENCY
+            WHERE TransactionID = ?
+            ORDER BY Denomination
+        """;
+
+        List<Map<String, Object>> currencyList =
+                jdbcTemplate.queryForList(currencySql, id);
+
+        result.put("currencyDetails", currencyList);
+
+        /*
+         * -----------------------------------------
+         * TICKET DETAILS
+         * -----------------------------------------
+         */
+        String ticketSql = """
+            SELECT
+                SequenceNumber,
+                Amount
+            FROM GSI.TRANSACTION_TICKET
+            WHERE TransactionID = ?
+            ORDER BY SequenceNumber
+        """;
+
+        List<Map<String, Object>> ticketList =
+                jdbcTemplate.queryForList(ticketSql, id);
+
+        result.put("ticketDetails", ticketList);
+
+        /*
+         * -----------------------------------------
+         * FINAL RESPONSE
+         * -----------------------------------------
+         */
+        return result;
+    }
+}

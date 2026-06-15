@@ -1,17 +1,24 @@
 package com.CasinoCtC.CCtCAPI.dto;
 
 import lombok.Data;
+import java.time.LocalDate;
 
 @Data
 public class TransactionSearchRequest {
 
-    private String businessDateFrom;
-    private String businessDateTo;
+
+	private LocalDate businessDateFrom;
+	private LocalDate businessDateTo;
+	private LocalDate collectionDateFrom;
+	private LocalDate collectionDateTo;
+
     private String boxNumberFrom;
     private String boxNumberTo;
     private String status;
     private Integer locationId;
     private String username;
+    private Integer userId;
+    private String ticketId;
   
 	private Integer pageNumber;
 	private Integer pageSize;

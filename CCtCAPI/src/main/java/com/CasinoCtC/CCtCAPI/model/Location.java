@@ -1,18 +1,20 @@
 package com.CasinoCtC.CCtCAPI.model;
 
 public class Location {
-
-    private Integer locationId;
+    private int locationId;
     private String locationName;
-    private Integer status;
+    private String address1;
+    private String address2;
+    private String city;
+    private String state;
+    private String zip;
+    private int status;
 
-    public Location() {}
-
-    public Integer getLocationId() {
+    public int getLocationId() {
         return locationId;
     }
 
-    public void setLocationId(Integer locationId) {
+    public void setLocationId(int locationId) {
         this.locationId = locationId;
     }
 
@@ -24,11 +26,51 @@ public class Location {
         this.locationName = locationName;
     }
 
-    public Integer getStatus() {
+    public String getAddress1() {
+        return address1;
+    }
+
+    public void setAddress1(String address1) {
+        this.address1 = address1;
+    }
+
+    public String getAddress2() {
+        return address2;
+    }
+
+    public void setAddress2(String address2) {
+        this.address2 = address2;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getZip() {
+        return zip;
+    }
+
+    public void setZip(String zip) {
+        this.zip = zip;
+    }
+
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(Integer status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 }

@@ -1,0 +1,5 @@
+package com.CasinoCtC.CCtCAPI.model;
+
+public class LocationMisc {
+
+}
