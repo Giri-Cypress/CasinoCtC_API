@@ -1,0 +1,12 @@
+package com.CasinoCtC.CCtCAPI.service;
+
+import java.util.List;
+
+import com.CasinoCtC.CCtCAPI.model.User;
+
+public interface UserService {
+    List<User> getAllUsers();
+    User getUserById(int id);
+    User saveUser(User user);
+    void deleteUser(int id);
+}

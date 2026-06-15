@@ -1,0 +1,26 @@
+package com.CasinoCtC.CCtCAPI.controller;
+
+import java.util.List;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import com.CasinoCtC.CCtCAPI.dao.RoleDAO;
+import com.CasinoCtC.CCtCAPI.model.Role;
+
+@RestController
+@RequestMapping("/api/roles")
+@PreAuthorize("hasRole('ADMIN')")
+public class RoleController {
+
+    private final RoleDAO roleDAO;
+
+    public RoleController(RoleDAO roleDAO) {
+        this.roleDAO = roleDAO;
+    }
+
+    @GetMapping
+    public List<Role> getAllRoles() {
+        return roleDAO.findAllRoles();
+    }
+}

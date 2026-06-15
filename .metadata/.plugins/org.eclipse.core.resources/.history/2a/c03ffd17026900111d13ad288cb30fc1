@@ -1,0 +1,86 @@
+package com.CasinoCtC.CCtCAPI.dao;
+
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import com.CasinoCtC.CCtCAPI.model.Role;
+
+@Repository
+public class RoleDAOImpl implements RoleDAO {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    public RoleDAOImpl(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
+    public List<String> findRolesByUserId(Integer userId) {
+        String sql =
+            "SELECT r.RoleName " +
+            "FROM GSI.ROLES r " +
+            "JOIN GSI.USER_ROLES ur ON r.RoleID = ur.RoleID " +
+            "WHERE ur.UserID = ?";
+
+        return jdbcTemplate.query(
+            sql,
+            (rs, rowNum) -> rs.getString("RoleName"),
+            userId
+        );
+    }
+
+    @Override
+    public List<Role> findAllRoles() {
+        String sql =
+            "SELECT RoleID AS id, RoleName AS name " +
+            "FROM GSI.ROLES " +
+            "ORDER BY RoleName";
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Role role = new Role();
+            role.setId(rs.getLong("id"));
+            role.setName(rs.getString("name"));
+            return role;
+        });
+    }
+
+    @Override
+    public List<Integer> findRoleIdsByUserId(Integer userId) {
+        String sql =
+            "SELECT RoleID " +
+            "FROM GSI.USER_ROLES " +
+            "WHERE UserID = ? " +
+            "ORDER BY RoleID";
+
+        return jdbcTemplate.query(
+            sql,
+            (rs, rowNum) -> rs.getInt("RoleID"),
+            userId
+        );
+    }
+
+    @Override
+    public void saveUserRoles(Integer userId, List<Integer> roleIds) {
+        deleteUserRoles(userId);
+
+        if (roleIds == null || roleIds.isEmpty()) {
+            return;
+        }
+
+        String sql =
+            "INSERT INTO GSI.USER_ROLES (UserID, RoleID) VALUES (?, ?)";
+
+        for (Integer roleId : roleIds) {
+            jdbcTemplate.update(sql, userId, roleId);
+        }
+    }
+
+    @Override
+    public void deleteUserRoles(Integer userId) {
+        String sql = "DELETE FROM GSI.USER_ROLES WHERE UserID = ?";
+        jdbcTemplate.update(sql, userId);
+    }
+}
