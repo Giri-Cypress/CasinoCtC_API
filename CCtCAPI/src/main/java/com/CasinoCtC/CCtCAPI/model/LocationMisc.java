@@ -2,27 +2,25 @@ package com.CasinoCtC.CCtCAPI.model;
 
 public class LocationMisc {
 
-    private int locationId;
-    private int miscNo;
+    private Integer locationNumber;
+    private Integer miscNumber;
     private String miscName;
     private String miscValue;
 
-    // ✅ Getters & Setters
-
-    public int getLocationId() {
-        return locationId;
+    public Integer getLocationNumber() {
+        return locationNumber;
     }
 
-    public void setLocationId(int locationId) {
-        this.locationId = locationId;
+    public void setLocationNumber(Integer locationNumber) {
+        this.locationNumber = locationNumber;
     }
 
-    public int getMiscNo() {
-        return miscNo;
+    public Integer getMiscNumber() {
+        return miscNumber;
     }
 
-    public void setMiscNo(int miscNo) {
-        this.miscNo = miscNo;
+    public void setMiscNumber(Integer miscNumber) {
+        this.miscNumber = miscNumber;
     }
 
     public String getMiscName() {

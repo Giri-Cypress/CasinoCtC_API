@@ -3,79 +3,36 @@ package com.CasinoCtC.CCtCAPI.model;
 import java.util.List;
 
 public class LoginResponse {
-
-    private String username;
+    private Integer userNumber;
+    private String userName;
     private List<String> roles;
     private List<Menu> menus;
+    private Integer locationNumber;
     private String locationName;
     private String token;
     private String refreshToken;
 
-    public LoginResponse() {
-    }
+    public Integer getUserNumber() { return userNumber; }
+    public void setUserNumber(Integer userNumber) { this.userNumber = userNumber; }
 
-    public LoginResponse(
-            String username,
-            List<String> roles,
-            List<Menu> menus) {
+    public String getUserName() { return userName; }
+    public void setUserName(String userName) { this.userName = userName; }
 
-        this.username = username;
-        this.roles = roles;
-        this.menus = menus;
-    }
+    public List<String> getRoles() { return roles; }
+    public void setRoles(List<String> roles) { this.roles = roles; }
 
-    // ✅ Username
-    public String getUsername() {
-        return username;
-    }
+    public List<Menu> getMenus() { return menus; }
+    public void setMenus(List<Menu> menus) { this.menus = menus; }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    public Integer getLocationNumber() { return locationNumber; }
+    public void setLocationNumber(Integer locationNumber) { this.locationNumber = locationNumber; }
 
-    // ✅ Roles
-    public List<String> getRoles() {
-        return roles;
-    }
+    public String getLocationName() { return locationName; }
+    public void setLocationName(String locationName) { this.locationName = locationName; }
 
-    public void setRoles(List<String> roles) {
-        this.roles = roles;
-    }
+    public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
 
-    // ✅ Menus
-    public List<Menu> getMenus() {
-        return menus;
-    }
-
-    public void setMenus(List<Menu> menus) {
-        this.menus = menus;
-    }
-
-    // ✅ Location
-    public String getLocationName() {
-        return locationName;
-    }
-
-    public void setLocationName(String locationName) {
-        this.locationName = locationName;
-    }
-
-    // ✅ JWT Token
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-    
-    // ✅ JWT Refresh Token
-	public String getRefreshToken() {
-	    return refreshToken;
-	}
-	
-	public void setRefreshToken(String refreshToken) {
-	    this.refreshToken = refreshToken;
-	}
-
+    public String getRefreshToken() { return refreshToken; }
+    public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
 }

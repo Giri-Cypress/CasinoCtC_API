@@ -1,43 +1,28 @@
 package com.CasinoCtC.CCtCAPI.model;
 
 public class Menu {
-
-    private Integer id;
-    private String name;
+    private Integer menuNumber;
+    private String menuKey;
     private String route;
-    private Integer parentID;
+    private Integer parentMenuNumber;
+    private Integer displayOrder;
+    private Integer status;
 
-    public Menu() {}
+    public Integer getMenuNumber() { return menuNumber; }
+    public void setMenuNumber(Integer menuNumber) { this.menuNumber = menuNumber; }
 
-    public Integer getId() {
-        return id;
-    }
+    public String getMenuKey() { return menuKey; }
+    public void setMenuKey(String menuKey) { this.menuKey = menuKey; }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    public String getRoute() { return route; }
+    public void setRoute(String route) { this.route = route; }
 
-    public String getName() {
-        return name;
-    }
+    public Integer getParentMenuNumber() { return parentMenuNumber; }
+    public void setParentMenuNumber(Integer parentMenuNumber) { this.parentMenuNumber = parentMenuNumber; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public Integer getDisplayOrder() { return displayOrder; }
+    public void setDisplayOrder(Integer displayOrder) { this.displayOrder = displayOrder; }
 
-    public String getRoute() {
-        return route;
-    }
-
-    public void setRoute(String route) {
-        this.route = route;
-    }
-    
-    public Integer getParentMenuID() {
-        return parentID;
-    }
-
-    public void setParentMenuID(Integer id) {
-        this.parentID = id;
-    }
+    public Integer getStatus() { return status; }
+    public void setStatus(Integer status) { this.status = status; }
 }

@@ -1,25 +1,24 @@
 package com.CasinoCtC.CCtCAPI.model;
 
 public class Role {
+    private Integer roleNumber;
+    private String roleName;
+    private Integer status;
+    private Integer overrideCashLimit;
+    private Integer overrideTicketLimit;
 
-    private Long id;
-    private String name;
+    public Integer getRoleNumber() { return roleNumber; }
+    public void setRoleNumber(Integer roleNumber) { this.roleNumber = roleNumber; }
 
-    public Role() {}
+    public String getRoleName() { return roleName; }
+    public void setRoleName(String roleName) { this.roleName = roleName; }
 
-    public Long getId() {
-        return id;
-    }
+    public Integer getStatus() { return status; }
+    public void setStatus(Integer status) { this.status = status; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Integer getOverrideCashLimit() { return overrideCashLimit; }
+    public void setOverrideCashLimit(Integer overrideCashLimit) { this.overrideCashLimit = overrideCashLimit; }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+    public Integer getOverrideTicketLimit() { return overrideTicketLimit; }
+    public void setOverrideTicketLimit(Integer overrideTicketLimit) { this.overrideTicketLimit = overrideTicketLimit; }
 }

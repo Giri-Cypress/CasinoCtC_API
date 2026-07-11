@@ -1,0 +1,2 @@
+package com.CasinoCtC.CCtCAPI.dto;
+public class DeviceSelectionStartRequest { private Integer locationNumber; private Integer userNumber; public Integer getLocationNumber() { return locationNumber; } public void setLocationNumber(Integer locationNumber) { this.locationNumber = locationNumber; } public Integer getUserNumber() { return userNumber; } public void setUserNumber(Integer userNumber) { this.userNumber = userNumber; } }

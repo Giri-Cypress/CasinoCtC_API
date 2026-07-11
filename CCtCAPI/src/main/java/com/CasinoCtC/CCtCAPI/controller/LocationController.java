@@ -1,67 +1,57 @@
 package com.CasinoCtC.CCtCAPI.controller;
 
 import java.util.List;
-import com.CasinoCtC.CCtCAPI.model.LocationMisc;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.CasinoCtC.CCtCAPI.model.Location;
 import com.CasinoCtC.CCtCAPI.model.LocationMisc;
 import com.CasinoCtC.CCtCAPI.service.LocationService;
+import com.CasinoCtC.CCtCAPI.service.LocationMiscService;
 
 @RestController
 @RequestMapping("/api/locations")
+@PreAuthorize("hasRole('ADMIN')")
 public class LocationController {
 
-    @Autowired
-    private LocationService locationService;
+    private final LocationService locationJpaService;
+    private final LocationMiscService locationMiscJpaService;
 
-    // ✅ GET ALL LOCATIONS
+    public LocationController(LocationService locationJpaService, LocationMiscService locationMiscJpaService) {
+        this.locationJpaService = locationJpaService;
+        this.locationMiscJpaService = locationMiscJpaService;
+    }
+
     @GetMapping
     public List<Location> getAllLocations() {
-        return locationService.getAllLocations();
+        return locationJpaService.getAllLocations();
     }
 
-    // ✅ GET LOCATION BY ID
-    @GetMapping("/{id}")
-    public Location getLocationById(@PathVariable int id) {
-        return locationService.getLocationById(id);
+    @GetMapping("/{locationNumber}")
+    public Location getLocationByNumber(@PathVariable Integer locationNumber) {
+        return locationJpaService.getLocationByNumber(locationNumber);
     }
 
-    // ✅ CREATE LOCATION
     @PostMapping
-    public Location createLocation(@RequestBody Location location) {
-        return locationService.saveLocation(location);
+    public Location saveLocation(@RequestBody Location location) {
+        return locationJpaService.saveLocation(location);
     }
 
-    // ✅ UPDATE LOCATION
-    @PutMapping("/{id}")
-    public Location updateLocation(@PathVariable int id,
-                                   @RequestBody Location location) {
-
-        location.setLocationId(id);  // ✅ ensure correct ID
-        return locationService.saveLocation(location);
+    @DeleteMapping("/{locationNumber}")
+    public void deleteLocation(@PathVariable Integer locationNumber) {
+        locationJpaService.deleteLocation(locationNumber);
     }
 
-    // ✅ DELETE LOCATION
-    @DeleteMapping("/{id}")
+    @GetMapping("/{locationNumber}/misc")
+    public List<LocationMisc> getLocationMisc(@PathVariable Integer locationNumber) {
+        return locationMiscJpaService.getByLocationNumber(locationNumber);
+    }
 
-	public void deleteLocation(@PathVariable int id) {
-	    locationService.deleteLocation(id);
-	}
-
-
-	@GetMapping("/{id}/misc")
-	public List<LocationMisc> getLocationMisc(@PathVariable int id) {
-	    return locationService.getLocationMisc(id);
-	}
-	
-	@PostMapping("/{id}/misc")
-	public ResponseEntity<Void> saveLocationMisc(@PathVariable int id, @RequestBody List<LocationMisc> list) {
-	    locationService.saveLocationMisc(id, list);
-	    return ResponseEntity.ok().build();
-}
-
+    @PostMapping("/{locationNumber}/misc")
+    public ResponseEntity<Void> saveLocationMisc(@PathVariable Integer locationNumber, @RequestBody List<LocationMisc> list) {
+        locationMiscJpaService.saveLocationMisc(locationNumber, list);
+        return ResponseEntity.ok().build();
+    }
 }
