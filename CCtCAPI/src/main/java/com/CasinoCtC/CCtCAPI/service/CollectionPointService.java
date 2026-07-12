@@ -3,7 +3,9 @@ package com.CasinoCtC.CCtCAPI.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.CasinoCtC.CCtCAPI.entity.CollectionPointEntity;
 import com.CasinoCtC.CCtCAPI.model.CollectionPoint;
@@ -41,6 +43,8 @@ public class CollectionPointService {
     public CollectionPoint saveCollectionPoint(
             CollectionPoint model) {
 
+        validateCollectionPoint(model);
+
         CollectionPointEntity entity =
                 repository.save(
                         toEntity(model));
@@ -53,6 +57,24 @@ public class CollectionPointService {
 
         repository.deleteById(
                 collectionPointId);
+    }
+
+    private void validateCollectionPoint(
+            CollectionPoint model) {
+
+        if (model == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Collection Point payload is required.");
+        }
+
+        Integer cpType = model.getCpType();
+
+        if (cpType == null || cpType < 1 || cpType > 9) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Collection Point Type must be between 1 and 9.");
+        }
     }
 
     private CollectionPoint toModel(
@@ -75,6 +97,9 @@ public class CollectionPointService {
 
         model.setStatus(
                 entity.getStatus());
+
+        model.setCpType(
+                entity.getCpType());
 
         return model;
     }
@@ -101,6 +126,9 @@ public class CollectionPointService {
                 model.getStatus() == null
                         ? 1
                         : model.getStatus());
+
+        entity.setCpType(
+                model.getCpType());
 
         return entity;
     }

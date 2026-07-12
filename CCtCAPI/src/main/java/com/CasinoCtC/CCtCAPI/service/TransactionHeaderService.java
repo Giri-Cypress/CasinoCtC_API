@@ -81,6 +81,9 @@ public class TransactionHeaderService {
                     dto.setName(
                             point.getCollectionPointName());
 
+                    dto.setCpType(
+                            point.getCpType());
+
                     return dto;
                 })
                 .toList();

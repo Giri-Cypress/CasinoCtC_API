@@ -7,6 +7,7 @@ public class CollectionPoint {
     private String collectionPointName;
     private String description;
     private Integer status;
+    private Integer cpType;
 
     public Integer getCollectionPointId() {
         return collectionPointId;
@@ -46,5 +47,13 @@ public class CollectionPoint {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public Integer getCpType() {
+        return cpType;
+    }
+
+    public void setCpType(Integer cpType) {
+        this.cpType = cpType;
     }
 }

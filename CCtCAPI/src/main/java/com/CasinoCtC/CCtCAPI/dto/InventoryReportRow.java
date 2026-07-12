@@ -4,6 +4,7 @@ public class InventoryReportRow {
 
     private Integer locationNumber;
     private Integer userNumber;
+    private String archiveDate;
     private Long cashAmount;
     private Integer denominationNumber;
     private String denominationDescription;
@@ -24,6 +25,9 @@ public class InventoryReportRow {
     public void setUserNumber(Integer userNumber) {
         this.userNumber = userNumber;
     }
+
+    public String getArchiveDate() { return archiveDate; }
+    public void setArchiveDate(String archiveDate) { this.archiveDate = archiveDate; }
 
     public Long getCashAmount() {
         return cashAmount;

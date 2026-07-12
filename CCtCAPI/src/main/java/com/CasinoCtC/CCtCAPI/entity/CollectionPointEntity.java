@@ -26,4 +26,7 @@ public class CollectionPointEntity {
 
     @Column(name = "status")
     private Integer status;
+
+    @Column(name = "cp_type")
+    private Integer cpType;
 }

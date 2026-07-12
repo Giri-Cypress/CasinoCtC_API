@@ -10,6 +10,7 @@ public class DailySummaryReportRequest {
     private LocalDate businessDateTo;
     private Integer userNumberFrom;
     private Integer userNumberTo;
+    private String transactionStatus = "PROCESSED";
 
     public Integer getLocationNumberFrom() {
         return locationNumberFrom;
@@ -57,5 +58,13 @@ public class DailySummaryReportRequest {
 
     public void setUserNumberTo(Integer userNumberTo) {
         this.userNumberTo = userNumberTo;
+    }
+
+    public String getTransactionStatus() {
+        return transactionStatus;
+    }
+
+    public void setTransactionStatus(String transactionStatus) {
+        this.transactionStatus = transactionStatus;
     }
 }

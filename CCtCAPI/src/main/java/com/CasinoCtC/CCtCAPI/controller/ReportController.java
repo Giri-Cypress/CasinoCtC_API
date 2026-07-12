@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.CasinoCtC.CCtCAPI.dto.DailySummaryReportRequest;
 import com.CasinoCtC.CCtCAPI.dto.DailySummaryReportRow;
+import com.CasinoCtC.CCtCAPI.dto.InventoryArchiveReportRequest;
 import com.CasinoCtC.CCtCAPI.dto.InventoryReportRequest;
 import com.CasinoCtC.CCtCAPI.dto.InventoryReportRow;
 import com.CasinoCtC.CCtCAPI.service.ReportService;
@@ -43,6 +44,16 @@ public class ReportController {
             Authentication authentication) {
 
         return reportService.getInventoryReport(
+                request,
+                authentication.getName());
+    }
+
+    @PostMapping("/inventory-archive")
+    public List<InventoryReportRow> getInventoryArchiveReport(
+            @RequestBody InventoryArchiveReportRequest request,
+            Authentication authentication) {
+
+        return reportService.getInventoryArchiveReport(
                 request,
                 authentication.getName());
     }

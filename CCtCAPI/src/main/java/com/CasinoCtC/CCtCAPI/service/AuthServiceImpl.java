@@ -3,6 +3,7 @@ package com.CasinoCtC.CCtCAPI.service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
@@ -132,7 +133,8 @@ public class AuthServiceImpl implements AuthService {
                     m.setStatus(me.getStatus());
                     return m;
                 })
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
+        ensureInventoryArchiveReportMenu(menus);
 
         String accessToken =
                 jwtUtil.generateAccessToken(user.getUserName(), roleNames);
@@ -203,7 +205,8 @@ public class AuthServiceImpl implements AuthService {
                     m.setStatus(me.getStatus());
                     return m;
                 })
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
+        ensureInventoryArchiveReportMenu(menus);
 
         String newAccessToken =
                 jwtUtil.generateAccessToken(user.getUserName(), roleNames);
@@ -249,6 +252,41 @@ public class AuthServiceImpl implements AuthService {
                     token.setRevokedAt(LocalDateTime.now());
                     refreshTokenRepository.save(token);
                 });
+    }
+
+    private void ensureInventoryArchiveReportMenu(List<Menu> menus) {
+        if (menus == null) {
+            return;
+        }
+
+        boolean hasInventoryArchiveReport = menus.stream()
+                .anyMatch(menu -> "menu.inventoryArchiveReport".equals(menu.getMenuKey())
+                        || "/reports/inventoryArchive".equalsIgnoreCase(String.valueOf(menu.getRoute())));
+
+        if (hasInventoryArchiveReport) {
+            return;
+        }
+
+        boolean hasReportsParent = menus.stream()
+                .anyMatch(menu -> "menu.reports".equals(menu.getMenuKey())
+                        || Integer.valueOf(3).equals(menu.getMenuNumber()));
+
+        boolean hasInventoryAccess = menus.stream()
+                .anyMatch(menu -> "menu.inventoryReport".equals(menu.getMenuKey())
+                        || "/reports/inventory".equalsIgnoreCase(String.valueOf(menu.getRoute())));
+
+        if (!hasReportsParent || !hasInventoryAccess) {
+            return;
+        }
+
+        Menu archiveMenu = new Menu();
+        archiveMenu.setMenuNumber(24);
+        archiveMenu.setMenuKey("menu.inventoryArchiveReport");
+        archiveMenu.setRoute("/reports/inventoryArchive");
+        archiveMenu.setParentMenuNumber(3);
+        archiveMenu.setDisplayOrder(3);
+        archiveMenu.setStatus(1);
+        menus.add(archiveMenu);
     }
 
     private void saveRefreshToken(

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.CasinoCtC.CCtCAPI.dto.DailySummaryReportRequest;
 import com.CasinoCtC.CCtCAPI.dto.DailySummaryReportRow;
+import com.CasinoCtC.CCtCAPI.dto.InventoryArchiveReportRequest;
 import com.CasinoCtC.CCtCAPI.dto.InventoryReportRequest;
 import com.CasinoCtC.CCtCAPI.dto.InventoryReportRow;
 
@@ -41,10 +42,11 @@ public class ReportService {
                 t.ticket_count,
                 t.total_amount
             FROM gsi.transactions t
-            WHERE t.status = 'PROCESSED'
+            WHERE t.status = :transactionStatus
         """);
 
         Map<String, Object> params = new LinkedHashMap<>();
+        params.put("transactionStatus", normalizeDailySummaryStatus(request));
 
         if (request != null) {
             if (request.getLocationNumberFrom() != null) {
@@ -101,6 +103,73 @@ public class ReportService {
             response.add(dto);
         }
 
+        return response;
+    }
+
+    private String normalizeDailySummaryStatus(DailySummaryReportRequest request) {
+        if (request == null || request.getTransactionStatus() == null) {
+            return "PROCESSED";
+        }
+
+        String normalizedStatus = request.getTransactionStatus().trim().toUpperCase();
+
+        if ("CANCELLED".equals(normalizedStatus)) {
+            return "CANCELLED";
+        }
+
+        return "PROCESSED";
+    }
+
+    @Transactional(readOnly = true)
+    public List<InventoryReportRow> getInventoryArchiveReport(
+            InventoryArchiveReportRequest request,
+            String printedByUserName) {
+
+        StringBuilder sql = new StringBuilder("""
+            SELECT
+                a.invarch_date,
+                a.location_number,
+                a.user_number,
+                a.cash_amt,
+                d.denom_number,
+                d.amount
+            FROM gsi.inventory_archive a
+            LEFT JOIN gsi.inventory_archive_dtl d
+                ON d.invarch_number = a.invarch_number
+               AND d.location_number = a.location_number
+            WHERE 1 = 1
+        """);
+
+        Map<String, Object> params = new LinkedHashMap<>();
+
+        if (request != null) {
+            if (request.getLocationNumberFrom() != null) { sql.append(" AND a.location_number >= :locationNumberFrom"); params.put("locationNumberFrom", request.getLocationNumberFrom()); }
+            if (request.getLocationNumberTo() != null) { sql.append(" AND a.location_number <= :locationNumberTo"); params.put("locationNumberTo", request.getLocationNumberTo()); }
+            if (request.getUserNumberFrom() != null) { sql.append(" AND a.user_number >= :userNumberFrom"); params.put("userNumberFrom", request.getUserNumberFrom()); }
+            if (request.getUserNumberTo() != null) { sql.append(" AND a.user_number <= :userNumberTo"); params.put("userNumberTo", request.getUserNumberTo()); }
+            if (request.getArchiveDateFrom() != null) { sql.append(" AND CAST(a.invarch_date AS date) >= :archiveDateFrom"); params.put("archiveDateFrom", request.getArchiveDateFrom()); }
+            if (request.getArchiveDateTo() != null) { sql.append(" AND CAST(a.invarch_date AS date) <= :archiveDateTo"); params.put("archiveDateTo", request.getArchiveDateTo()); }
+        }
+
+        sql.append(" ORDER BY a.invarch_date, a.location_number, a.user_number, d.denom_number");
+
+        Query query = entityManager.createNativeQuery(sql.toString());
+        setParameters(query, params);
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> rows = query.getResultList();
+
+        List<InventoryReportRow> response = new ArrayList<>();
+        for (Object[] row : rows) {
+            InventoryReportRow dto = new InventoryReportRow();
+            dto.setArchiveDate(toDateString(row[0]));
+            dto.setLocationNumber(toInteger(row[1]));
+            dto.setUserNumber(toInteger(row[2]));
+            dto.setCashAmount(toLong(row[3]));
+            dto.setDenominationNumber(toInteger(row[4]));
+            dto.setDenominationAmount(toLong(row[5]));
+            response.add(dto);
+        }
         return response;
     }
 

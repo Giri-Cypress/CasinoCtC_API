@@ -127,7 +127,7 @@ public class TransactionServiceImpl implements TransactionService {
                                         HttpStatus.NOT_FOUND,
                                         "Transaction not found"));
 
-        transaction.setStatus("CANCEL");
+        transaction.setStatus("CANCELLED");
         transaction.setUpdatedAt(LocalDateTime.now());
 
         transactionRepository.save(transaction);
@@ -1289,9 +1289,8 @@ public class TransactionServiceImpl implements TransactionService {
                         .trim()
                         .toUpperCase();
 
-        if ("CANCEL".equals(normalized)
-                || "CANCELLED".equals(normalized)) {
-            return "CANCEL";
+        if ("CANCELLED".equals(normalized)) {
+            return "CANCELLED";
         }
 
         if ("EDITED".equals(normalized)) {

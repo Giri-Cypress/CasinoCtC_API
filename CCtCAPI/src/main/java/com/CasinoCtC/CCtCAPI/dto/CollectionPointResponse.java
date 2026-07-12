@@ -7,4 +7,5 @@ public class CollectionPointResponse {
 
     private Integer id;
     private String name;
+    private Integer cpType;
 }
